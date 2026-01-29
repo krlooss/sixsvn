@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.SixSeven" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.SixSeven" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">#00ff41</item>
         <item name="colorPrimaryVariant">#0f3460</item>
         <item name="colorOnPrimary">#000000</item>

@@ -10,6 +10,9 @@ import android.media.SoundPool
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.view.Menu
+import android.view.MenuItem
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.sixseven.app.databinding.ActivityMainBinding
 import kotlin.math.abs
@@ -42,10 +45,29 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setSupportActionBar(binding.toolbar)
+
         initializeSensors()
         initializeSounds()
         initializeManagers()
         setupUI()
+
+        showTutorialIfFirstLaunch()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_help -> {
+                showTutorial()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun initializeSensors() {
@@ -92,6 +114,46 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 binding.usernameInput.text.clear()
             }
         }
+    }
+
+    private fun showTutorialIfFirstLaunch() {
+        val prefs = getSharedPreferences("SixSevenPrefs", Context.MODE_PRIVATE)
+        val hasSeenTutorial = prefs.getBoolean("has_seen_tutorial", false)
+
+        if (!hasSeenTutorial) {
+            showTutorial()
+            prefs.edit().putBoolean("has_seen_tutorial", true).apply()
+        }
+    }
+
+    private fun showTutorial() {
+        AlertDialog.Builder(this)
+            .setTitle("How to Play Six Seven")
+            .setMessage(
+                """
+                Welcome to Six Seven!
+
+                📱 How to Play:
+                1. Hold your phone vertically
+                2. Move it UP quickly (you'll hear a sound)
+                3. Move it DOWN quickly (you'll hear another sound)
+                4. Each complete UP-DOWN cycle = 1 point!
+
+                🎯 Features:
+                • Your score is saved automatically
+                • Submit your score to the global leaderboard
+                • Compete with Six Seveners worldwide
+
+                Tap the ? icon anytime to see these instructions again.
+
+                Let's go!
+                """.trimIndent()
+            )
+            .setPositiveButton("Got it!") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setCancelable(true)
+            .show()
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
