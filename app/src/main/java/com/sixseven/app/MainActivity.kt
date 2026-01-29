@@ -106,8 +106,19 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         binding.submitScoreButton.setOnClickListener {
             val username = binding.usernameInput.text.toString().trim()
             if (username.isNotEmpty()) {
-                leaderboardManager.submitScore(username, currentScore)
-                binding.usernameInput.text.clear()
+                leaderboardManager.submitScore(username, currentScore) { success ->
+                    runOnUiThread {
+                        if (success) {
+                            android.widget.Toast.makeText(this, "Score submitted!", android.widget.Toast.LENGTH_SHORT).show()
+                            binding.usernameInput.text.clear()
+                            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                                loadLeaderboard()
+                            }, 1000)
+                        } else {
+                            android.widget.Toast.makeText(this, "Failed to submit score. Check internet connection.", android.widget.Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
             }
         }
     }
