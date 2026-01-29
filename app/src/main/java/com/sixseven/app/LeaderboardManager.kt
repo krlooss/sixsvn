@@ -14,7 +14,7 @@ data class LeaderboardEntry(
 
 class LeaderboardManager {
 
-    private val database = FirebaseDatabase.getInstance()
+    private val database = FirebaseDatabase.getInstance("https://sixsvn-6e1aa-default-rtdb.europe-west1.firebasedatabase.app/")
     private val leaderboardRef = database.getReference("leaderboard")
 
     fun submitScore(username: String, score: Int) {
