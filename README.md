@@ -2,6 +2,8 @@
 
 Motion-based game app for the "6 7" trend movement.
 
+Track your six seven moves and compete globally!
+
 ## Features
 
 - Accelerometer-based motion detection
