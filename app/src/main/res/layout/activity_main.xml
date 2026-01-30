@@ -67,16 +67,33 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="32dp"/>
 
-    <Button
-        android:id="@+id/resetButton"
+    <LinearLayout
+        android:id="@+id/leaderboardToggle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Reset Score"
-        android:backgroundTint="#e94560"
+        android:orientation="horizontal"
         app:layout_constraintTop_toBottomOf="@id/instructionText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
+        android:layout_marginTop="40dp">
+
+        <Button
+            android:id="@+id/globalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="GLOBAL"
+            android:backgroundTint="#0f3460"
+            android:textSize="14sp"/>
+
+        <Button
+            android:id="@+id/localButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LOCAL"
+            android:backgroundTint="#555555"
+            android:textSize="14sp"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/leaderboardTitle"
@@ -86,10 +103,10 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="#00ff41"
-        app:layout_constraintTop_toBottomOf="@id/resetButton"
+        app:layout_constraintTop_toBottomOf="@id/leaderboardToggle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="40dp"/>
+        android:layout_marginTop="16dp"/>
 
     <EditText
         android:id="@+id/usernameInput"

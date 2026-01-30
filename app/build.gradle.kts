@@ -50,4 +50,6 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.firebase:firebase-database-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
+
+    implementation("com.google.code.gson:gson:2.10.1")
 }

@@ -23,6 +23,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var soundPool: SoundPool
     private lateinit var scoreManager: ScoreManager
     private lateinit var leaderboardManager: LeaderboardManager
+    private lateinit var localLeaderboardManager: LocalLeaderboardManager
+
+    private var isGlobalView = true
 
     private var soundUp: Int = 0
     private var soundDown: Int = 0
@@ -92,6 +95,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private fun initializeManagers() {
         scoreManager = ScoreManager(this)
         leaderboardManager = LeaderboardManager()
+        localLeaderboardManager = LocalLeaderboardManager(this)
         currentScore = 0
         scoreManager.saveScore(0)
     }
@@ -109,29 +113,42 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
         })
 
-        binding.resetButton.setOnClickListener {
-            scoreManager.resetScore()
-            currentScore = 0
-            updateScoreDisplay()
+        binding.globalButton.setOnClickListener {
+            isGlobalView = true
+            updateLeaderboardView()
+        }
+
+        binding.localButton.setOnClickListener {
+            isGlobalView = false
+            updateLeaderboardView()
         }
 
         binding.submitScoreButton.setOnClickListener {
             val username = binding.usernameInput.text.toString().trim()
-            leaderboardManager.submitScore(username, currentScore) { success ->
+            val scoreToSubmit = currentScore
+
+            localLeaderboardManager.submitScore(username, scoreToSubmit)
+
+            binding.usernameInput.text.clear()
+            currentScore = 0
+            scoreManager.saveScore(0)
+            updateScoreDisplay()
+
+            leaderboardManager.submitScore(username, scoreToSubmit) { success ->
                 runOnUiThread {
                     if (success) {
-                        android.widget.Toast.makeText(this, "Score submitted!", android.widget.Toast.LENGTH_SHORT).show()
-                        binding.usernameInput.text.clear()
-                        currentScore = 0
-                        scoreManager.saveScore(0)
-                        updateScoreDisplay()
-                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                            loadLeaderboard()
-                        }, 1000)
+                        android.widget.Toast.makeText(this, "Score submitted to global leaderboard!", android.widget.Toast.LENGTH_SHORT).show()
                     } else {
-                        android.widget.Toast.makeText(this, "Failed to submit score. Check internet connection.", android.widget.Toast.LENGTH_LONG).show()
+                        android.widget.Toast.makeText(this, "Saved locally. Failed to submit globally.", android.widget.Toast.LENGTH_LONG).show()
                     }
+                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                        loadLeaderboard()
+                    }, 1000)
                 }
+            }
+
+            if (!isGlobalView) {
+                loadLeaderboard()
             }
         }
     }
@@ -254,17 +271,42 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         updateSubmitButtonState()
     }
 
+    private fun updateLeaderboardView() {
+        if (isGlobalView) {
+            binding.globalButton.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#0f3460"))
+            binding.localButton.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#555555"))
+            binding.leaderboardTitle.text = "GLOBAL LEADERBOARD"
+        } else {
+            binding.globalButton.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#555555"))
+            binding.localButton.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#0f3460"))
+            binding.leaderboardTitle.text = "LOCAL LEADERBOARD"
+        }
+        loadLeaderboard()
+    }
+
     private fun loadLeaderboard() {
-        leaderboardManager.getTopScores { scores ->
-            runOnUiThread {
-                val leaderboardText = scores.mapIndexed { index, entry ->
-                    "${index + 1}. ${entry.username}: ${entry.score}"
-                }.joinToString("\n")
-                binding.leaderboardText.text = if (leaderboardText.isEmpty()) {
-                    "No scores yet"
-                } else {
-                    leaderboardText
+        if (isGlobalView) {
+            leaderboardManager.getTopScores { scores ->
+                runOnUiThread {
+                    val leaderboardText = scores.mapIndexed { index, entry ->
+                        "${index + 1}. ${entry.username}: ${entry.score}"
+                    }.joinToString("\n")
+                    binding.leaderboardText.text = if (leaderboardText.isEmpty()) {
+                        "No scores yet"
+                    } else {
+                        leaderboardText
+                    }
                 }
+            }
+        } else {
+            val scores = localLeaderboardManager.getTopScores()
+            val leaderboardText = scores.mapIndexed { index, entry ->
+                "${index + 1}. ${entry.username}: ${entry.score}"
+            }.joinToString("\n")
+            binding.leaderboardText.text = if (leaderboardText.isEmpty()) {
+                "No scores yet"
+            } else {
+                leaderboardText
             }
         }
     }
