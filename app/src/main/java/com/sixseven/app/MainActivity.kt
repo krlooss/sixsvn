@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     private var soundUp: Int = 0
     private var soundDown: Int = 0
+    private var soundCrowd: Int = 0
 
     private var lastAcceleration: Float = 0f
     private var isMovingUp = false
@@ -79,12 +80,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             .build()
 
         soundPool = SoundPool.Builder()
-            .setMaxStreams(2)
+            .setMaxStreams(3)
             .setAudioAttributes(attributes)
             .build()
 
         soundUp = soundPool.load(this, R.raw.sound_up, 1)
         soundDown = soundPool.load(this, R.raw.sound_down, 1)
+        soundCrowd = soundPool.load(this, R.raw.crowd_cheer, 1)
     }
 
     private fun initializeManagers() {
@@ -212,6 +214,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         currentScore++
         scoreManager.saveScore(currentScore)
         updateScoreDisplay()
+
+        if (currentScore % 50 == 0) {
+            soundPool.play(soundCrowd, 1f, 1f, 1, 0, 1f)
+        }
 
         if (currentScore % 10 == 0) {
             binding.scoreText.animate()
