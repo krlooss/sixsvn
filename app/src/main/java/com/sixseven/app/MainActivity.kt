@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             .build()
 
         soundPool = SoundPool.Builder()
-            .setMaxStreams(3)
+            .setMaxStreams(5)
             .setAudioAttributes(attributes)
             .build()
 
@@ -99,6 +99,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private fun setupUI() {
         updateScoreDisplay()
         loadLeaderboard()
+        updateSubmitButtonState()
+
+        binding.usernameInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                updateSubmitButtonState()
+            }
+        })
 
         binding.resetButton.setOnClickListener {
             scoreManager.resetScore()
@@ -108,25 +117,29 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         binding.submitScoreButton.setOnClickListener {
             val username = binding.usernameInput.text.toString().trim()
-            if (username.isNotEmpty()) {
-                leaderboardManager.submitScore(username, currentScore) { success ->
-                    runOnUiThread {
-                        if (success) {
-                            android.widget.Toast.makeText(this, "Score submitted!", android.widget.Toast.LENGTH_SHORT).show()
-                            binding.usernameInput.text.clear()
-                            currentScore = 0
-                            scoreManager.saveScore(0)
-                            updateScoreDisplay()
-                            android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                                loadLeaderboard()
-                            }, 1000)
-                        } else {
-                            android.widget.Toast.makeText(this, "Failed to submit score. Check internet connection.", android.widget.Toast.LENGTH_LONG).show()
-                        }
+            leaderboardManager.submitScore(username, currentScore) { success ->
+                runOnUiThread {
+                    if (success) {
+                        android.widget.Toast.makeText(this, "Score submitted!", android.widget.Toast.LENGTH_SHORT).show()
+                        binding.usernameInput.text.clear()
+                        currentScore = 0
+                        scoreManager.saveScore(0)
+                        updateScoreDisplay()
+                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                            loadLeaderboard()
+                        }, 1000)
+                    } else {
+                        android.widget.Toast.makeText(this, "Failed to submit score. Check internet connection.", android.widget.Toast.LENGTH_LONG).show()
                     }
                 }
             }
         }
+    }
+
+    private fun updateSubmitButtonState() {
+        val hasUsername = binding.usernameInput.text.toString().trim().isNotEmpty()
+        val hasScore = currentScore > 0
+        binding.submitScoreButton.isEnabled = hasUsername && hasScore
     }
 
     private fun showTutorialIfFirstLaunch() {
@@ -215,7 +228,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         scoreManager.saveScore(currentScore)
         updateScoreDisplay()
 
-        if (currentScore % 50 == 0) {
+        if (currentScore % 33 == 0) {
             soundPool.play(soundCrowd, 1f, 1f, 1, 0, 1f)
         }
 
@@ -238,6 +251,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private fun updateScoreDisplay() {
         binding.scoreText.text = "Score: $currentScore"
         binding.bestScoreText.text = "Best: ${scoreManager.getBestScore()}"
+        updateSubmitButtonState()
     }
 
     private fun loadLeaderboard() {
