@@ -90,7 +90,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private fun initializeManagers() {
         scoreManager = ScoreManager(this)
         leaderboardManager = LeaderboardManager()
-        currentScore = scoreManager.getScore()
+        currentScore = 0
+        scoreManager.saveScore(0)
     }
 
     private fun setupUI() {
@@ -111,6 +112,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                         if (success) {
                             android.widget.Toast.makeText(this, "Score submitted!", android.widget.Toast.LENGTH_SHORT).show()
                             binding.usernameInput.text.clear()
+                            currentScore = 0
+                            scoreManager.saveScore(0)
+                            updateScoreDisplay()
                             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                                 loadLeaderboard()
                             }, 1000)
@@ -208,6 +212,21 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         currentScore++
         scoreManager.saveScore(currentScore)
         updateScoreDisplay()
+
+        if (currentScore % 10 == 0) {
+            binding.scoreText.animate()
+                .scaleX(1.5f)
+                .scaleY(1.5f)
+                .setDuration(150)
+                .withEndAction {
+                    binding.scoreText.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(150)
+                        .start()
+                }
+                .start()
+        }
     }
 
     private fun updateScoreDisplay() {
